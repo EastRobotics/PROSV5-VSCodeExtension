@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { stringify } from 'querystring';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -26,16 +27,45 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 
 		// Display a message box to the user
-		vscode.window.showInformationMessage('PROSV5 Create Proj');
+		vscode.window.showInputBox({ placeHolder: "Project Name?" }).then(projname => {
+	
+			if (!projname) {
+			  return;	
+			
+			}
+			
+			if(projname){
+				vscode.window.showInformationMessage(projname);
+				}
+				proscommand("prosv5 make");
+				// Display a message box to the user
+				vscode.window.showInformationMessage('PROSV5 Create Proj');
+			});
+					
 	};
 
 	const prjbuild = 'extension.prosv5BuildProj';
 
 	const prjbuildHandler = () => {
 	  // The code you place here will be executed every time your command is executed
+	 // const terminals = <vscode.Terminal[]>(<any>vscode.window).terminals;
+	 
 
-	  // Display a message box to the user
-	  vscode.window.showInformationMessage('PROSV5 Build Proj');
+	// vscode.window.showInputBox({ placeHolder: "Project Name" }).then(projname => {
+	
+		// if (!projname) {
+		//   return;	
+		
+		// }
+		// if(projname){
+		// 	vscode.window.showInformationMessage(projname);
+		// 	}
+		// 	proscommand("prosv5 make");
+		// 	// Display a message box to the user
+		// 	vscode.window.showInformationMessage('PROSV5 Build Proj');
+		// });
+		proscommand("prosv5 make");
+   
   };
 
 	context.subscriptions.push(vscode.commands.registerCommand(create, createHandler));
@@ -45,3 +75,28 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {}
+
+function proscommand(commandtext: string):boolean{
+if (ensureTerminalExists()) {
+	const terminal = (vscode.window).terminals[0];
+	terminal.show();
+	terminal.sendText(commandtext);
+	//vscode.window.terminals.map[].sendText("prosv5 make", false));
+}else
+{
+	const terminal = vscode.window.createTerminal(`PROS Terminal`);
+	terminal.sendText(commandtext);
+}
+return true;
+}
+
+
+function ensureTerminalExists(): boolean {
+	if ((<any>vscode.window).terminals.length === 0) {
+		vscode.window.showErrorMessage('No active terminals');
+		return false;
+	}
+	return true;
+}
+
+
